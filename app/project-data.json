@@ -1,0 +1,53 @@
+{
+  "projects": [
+    {
+      "name": "Atlas Platform Migration",
+      "owner": "Maya Chen",
+      "status": "on-track",
+      "recentActivity": "Completed staging cutover rehearsal yesterday",
+      "priority": "p0"
+    },
+    {
+      "name": "Customer Insights Portal",
+      "owner": "Jon Bell",
+      "status": "at-risk",
+      "recentActivity": "Resolved two dashboard API defects today",
+      "priority": "p1"
+    },
+    {
+      "name": "Mobile Checkout Refresh",
+      "owner": "Priya Nair",
+      "status": "blocked",
+      "recentActivity": "Waiting on payment provider sandbox credentials",
+      "priority": "p0"
+    },
+    {
+      "name": "Knowledge Base Search",
+      "owner": "Owen Wright",
+      "status": "completed",
+      "recentActivity": "Released semantic search improvements last Friday",
+      "priority": "p2"
+    },
+    {
+      "name": "Partner API Gateway",
+      "owner": "Elena Torres",
+      "status": "off-track",
+      "recentActivity": "Architecture review identified scaling gaps",
+      "priority": "p1"
+    },
+    {
+      "name": "Internal Design System",
+      "owner": "Sam Rivera",
+      "status": "not-started",
+      "recentActivity": "Kickoff scheduled for next Monday",
+      "priority": "p3"
+    },
+    {
+      "name": "Usage Analytics Pipeline",
+      "owner": "Nadia Patel",
+      "status": "on-track",
+      "recentActivity": "Merged PR #142 for daily aggregation jobs",
+      "priority": "p2"
+    }
+  ]
+}

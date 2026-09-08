@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Pulse</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="dashboard">
+    <header class="dashboard__header">
+      <h1 class="dashboard__title">Project Pulse</h1>
+      <p class="dashboard__subtitle">Track project health, ownership, priority, and recent activity at a glance.</p>
+    </header>
+
+    <main>
+      <section aria-labelledby="projects-heading">
+        <h2 id="projects-heading">Active Projects</h2>
+        <div id="project-list" class="dashboard__grid" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const projectList = document.getElementById("project-list");
+      const knownStatuses = new Set([
+        "on-track",
+        "at-risk",
+        "off-track",
+        "blocked",
+        "completed",
+        "not-started"
+      ]);
+      const knownPriorities = new Set(["p0", "p1", "p2", "p3"]);
+
+      function normalizeValue(value) {
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-");
+      }
+
+      function getStatusClass(status) {
+        const normalizedStatus = normalizeValue(status);
+
+        if (!knownStatuses.has(normalizedStatus)) {
+          console.warn(`Unknown project status "${status}". Falling back to status--unknown.`);
+          return "status--unknown";
+        }
+
+        return `status--${normalizedStatus}`;
+      }
+
+      function getPriorityClass(priority) {
+        const normalizedPriority = normalizeValue(priority);
+
+        if (!knownPriorities.has(normalizedPriority)) {
+          console.warn(`Unknown project priority "${priority}". Falling back to priority--unknown.`);
+          return "priority--unknown";
+        }
+
+        return `priority--${normalizedPriority}`;
+      }
+
+      function formatDisplayValue(value) {
+        const normalizedValue = normalizeValue(value);
+
+        if (!normalizedValue) {
+          return "Unknown";
+        }
+
+        if (/^p[0-3]$/.test(normalizedValue)) {
+          return normalizedValue.toUpperCase();
+        }
+
+        return normalizedValue
+          .split("-")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ");
+      }
+
+      function createFieldElement(className, label, value, modifierClass) {
+        const element = document.createElement("p");
+        element.classList.add(className);
+
+        if (modifierClass) {
+          element.classList.add(modifierClass);
+        }
+
+        const labelElement = document.createElement("strong");
+        labelElement.textContent = `${label}: `;
+        element.appendChild(labelElement);
+        element.appendChild(document.createTextNode(value || "Unknown"));
+
+        return element;
+      }
+
+      function createProjectCard(project) {
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const projectName = document.createElement("h3");
+        projectName.className = "project-card__name";
+        projectName.textContent = project.name || "Unnamed project";
+
+        const owner = createFieldElement("project-card__owner", "Owner", project.owner);
+        const status = createFieldElement(
+          "project-card__status",
+          "Status",
+          formatDisplayValue(project.status),
+          getStatusClass(project.status)
+        );
+        const recentActivity = createFieldElement(
+          "project-card__recent-activity",
+          "Recent activity",
+          project.recentActivity
+        );
+        const priority = createFieldElement(
+          "project-card__priority",
+          "Priority",
+          formatDisplayValue(project.priority),
+          getPriorityClass(project.priority)
+        );
+
+        card.append(projectName, owner, status, recentActivity, priority);
+
+        return card;
+      }
+
+      function showMessage(message, className) {
+        const messageElement = document.createElement("p");
+        messageElement.className = className;
+        messageElement.textContent = message;
+        projectList.replaceChildren(messageElement);
+      }
+
+      fetch("./project-data.json")
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Project data request failed with status ${response.status}`);
+          }
+
+          return response.json();
+        })
+        .then((data) => {
+          const projects = Array.isArray(data.projects) ? data.projects : [];
+
+          if (projects.length === 0) {
+            showMessage("No projects to display.", "dashboard__empty-message");
+            return;
+          }
+
+          const fragment = document.createDocumentFragment();
+          projects.forEach((project) => {
+            fragment.appendChild(createProjectCard(project));
+          });
+          projectList.replaceChildren(fragment);
+        })
+        .catch((error) => {
+          console.error("Unable to load project data.", error);
+          showMessage("Unable to load project data. Please try again later.", "dashboard__error-message");
+        });
+    });
+  </script>
+</body>
+</html>

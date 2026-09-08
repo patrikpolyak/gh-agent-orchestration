@@ -1,0 +1,504 @@
+/* ==========================================================================
+   Project Pulse — Dashboard Stylesheet
+   ==========================================================================
+
+   CLASS CONTRACT (source of truth for markup — Coder must emit these
+   exact class names so this stylesheet applies correctly):
+
+   Layout
+   ------
+   .dashboard                    Top-level container. Holds header + grid.
+   .dashboard__header            Header area (title + subtitle/meta).
+   .dashboard__title             Main "Project Pulse" heading.
+   .dashboard__subtitle          Optional subtitle / meta line under title.
+   .dashboard__grid              Responsive CSS Grid holding .project-card
+                                  items. (If the Coder places cards directly
+                                  inside .dashboard without a nested grid
+                                  wrapper, .dashboard itself also carries the
+                                  grid rules — both patterns are supported,
+                                  see below.)
+
+   Card
+   ----
+   .project-card                 One project's card (grid item).
+   .project-card__header         Optional wrapper for name + status row.
+   .project-card__name           Project name / title text.
+   .project-card__owner          Project owner / team text.
+   .project-card__status         Status badge wrapper (text required, not
+                                  color alone). Combine with a status
+                                  modifier, e.g.:
+                                    class="project-card__status status--on-track"
+   .project-card__priority       Priority badge wrapper. Combine with a
+                                  priority modifier, e.g.:
+                                    class="project-card__priority priority--p0"
+   .project-card__recent-activity
+                                  Subtle secondary/meta line, e.g.
+                                  "Updated 2 days ago".
+   .project-card__description    Optional longer description text (wraps /
+                                  truncates gracefully, does not break layout).
+
+   Status vocabulary (pick exactly one modifier per card, on
+   .project-card__status, in addition to the base class):
+     status--on-track
+     status--at-risk
+     status--off-track
+     status--blocked
+     status--completed
+     status--not-started
+     status--unknown        (fallback if value is missing/unrecognized)
+
+   Priority vocabulary (pick exactly one modifier per card, on
+   .project-card__priority, in addition to the base class):
+     priority--p0            (most urgent — bold/high emphasis)
+     priority--p1
+     priority--p2
+     priority--p3            (subtle — low emphasis)
+     priority--unknown       (fallback if value is missing/unrecognized)
+
+   Example card markup:
+
+     <article class="project-card">
+       <div class="project-card__header">
+         <h3 class="project-card__name">Payments Migration</h3>
+         <span class="project-card__status status--at-risk">At risk</span>
+       </div>
+       <p class="project-card__owner">Owner: Priya Shah</p>
+       <p class="project-card__description">…</p>
+       <div class="project-card__footer">
+         <span class="project-card__priority priority--p1">P1</span>
+         <span class="project-card__recent-activity">Updated 2 days ago</span>
+       </div>
+     </article>
+
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Design tokens
+   -------------------------------------------------------------------------- */
+:root {
+  /* Font stack — system UI only, works fully offline */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Shadows (light mode) */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 10px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 12px 24px rgba(15, 23, 42, 0.14), 0 4px 8px rgba(15, 23, 42, 0.08);
+
+  /* Core palette */
+  --color-bg: #f4f6fb;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text: #1a2233;
+  --color-text-muted: #5b6472;
+  --color-text-subtle: #8892a0;
+  --color-accent: #2563eb;
+  --color-accent-contrast: #ffffff;
+  --color-focus-ring: #2563eb;
+
+  /* Status colors — background/text pairs chosen for WCAG AA contrast */
+  --status-on-track-bg: #dcfce7;
+  --status-on-track-text: #14532d;
+  --status-on-track-border: #86efac;
+
+  --status-at-risk-bg: #fef3c7;
+  --status-at-risk-text: #7c4a03;
+  --status-at-risk-border: #fcd34d;
+
+  --status-off-track-bg: #fee2e2;
+  --status-off-track-text: #7f1d1d;
+  --status-off-track-border: #fca5a5;
+
+  --status-blocked-bg: #ede9fe;
+  --status-blocked-text: #4c1d95;
+  --status-blocked-border: #c4b5fd;
+
+  --status-completed-bg: #dbeafe;
+  --status-completed-text: #1e3a8a;
+  --status-completed-border: #93c5fd;
+
+  --status-not-started-bg: #e2e8f0;
+  --status-not-started-text: #334155;
+  --status-not-started-border: #cbd5e1;
+
+  --status-unknown-bg: #f1f5f9;
+  --status-unknown-text: #475569;
+  --status-unknown-border: #cbd5e1;
+
+  /* Priority colors */
+  --priority-p0-bg: #dc2626;
+  --priority-p0-text: #ffffff;
+  --priority-p1-bg: #fb923c;
+  --priority-p1-text: #431407;
+  --priority-p2-bg: #fde68a;
+  --priority-p2-text: #713f12;
+  --priority-p3-bg: #e2e8f0;
+  --priority-p3-text: #334155;
+  --priority-unknown-bg: #e2e8f0;
+  --priority-unknown-text: #334155;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0f1522;
+    --color-surface: #161d2e;
+    --color-surface-alt: #1b2436;
+    --color-border: #2b3550;
+    --color-text: #e7ecf7;
+    --color-text-muted: #a6b0c3;
+    --color-text-subtle: #7d879c;
+    --color-accent: #60a5fa;
+    --color-accent-contrast: #0b1220;
+    --color-focus-ring: #93c5fd;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 14px 28px rgba(0, 0, 0, 0.55);
+
+    --status-on-track-bg: #12321f;
+    --status-on-track-text: #86efac;
+    --status-on-track-border: #1f5c37;
+
+    --status-at-risk-bg: #3a2c07;
+    --status-at-risk-text: #fcd34d;
+    --status-at-risk-border: #6b4e0b;
+
+    --status-off-track-bg: #3a1414;
+    --status-off-track-text: #fca5a5;
+    --status-off-track-border: #6b1f1f;
+
+    --status-blocked-bg: #2a1f4d;
+    --status-blocked-text: #c4b5fd;
+    --status-blocked-border: #4a3a86;
+
+    --status-completed-bg: #142a4d;
+    --status-completed-text: #93c5fd;
+    --status-completed-border: #234a80;
+
+    --status-not-started-bg: #232c3f;
+    --status-not-started-text: #cbd5e1;
+    --status-not-started-border: #37415a;
+
+    --status-unknown-bg: #232c3f;
+    --status-unknown-text: #b7c0d1;
+    --status-unknown-border: #37415a;
+
+    --priority-p0-bg: #ef4444;
+    --priority-p0-text: #fff5f5;
+    --priority-p1-bg: #f59e0b;
+    --priority-p1-text: #2a1a02;
+    --priority-p2-bg: #4b3f1a;
+    --priority-p2-text: #fde68a;
+    --priority-p3-bg: #29334a;
+    --priority-p3-text: #b7c0d1;
+    --priority-unknown-bg: #29334a;
+    --priority-unknown-text: #b7c0d1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Base / reset
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Visible focus states for all interactive/focusable elements */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible,
+.project-card:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Dashboard container + header
+   -------------------------------------------------------------------------- */
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+}
+
+.dashboard__header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dashboard__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.dashboard__subtitle {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+/* --------------------------------------------------------------------------
+   Card grid — responsive, no JS required
+   -------------------------------------------------------------------------- */
+.dashboard__grid,
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+}
+
+/* Header should not participate in the card grid columns when .dashboard
+   itself is the grid container (i.e. no .dashboard__grid wrapper used). */
+.dashboard > .dashboard__header {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 599px) {
+  .dashboard__grid,
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Project card
+   -------------------------------------------------------------------------- */
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  min-width: 0; /* allow text truncation inside grid item */
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-accent);
+}
+
+.project-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.project-card__name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.project-card__owner {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-card__description {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.project-card__footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Secondary/meta line for recent activity */
+.project-card__recent-activity {
+  font-size: 0.8rem;
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   Status badges — color-coded, text pairs with color (not color alone)
+   -------------------------------------------------------------------------- */
+.project-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status--on-track {
+  background: var(--status-on-track-bg);
+  color: var(--status-on-track-text);
+  border-color: var(--status-on-track-border);
+}
+
+.status--at-risk {
+  background: var(--status-at-risk-bg);
+  color: var(--status-at-risk-text);
+  border-color: var(--status-at-risk-border);
+}
+
+.status--off-track {
+  background: var(--status-off-track-bg);
+  color: var(--status-off-track-text);
+  border-color: var(--status-off-track-border);
+}
+
+.status--blocked {
+  background: var(--status-blocked-bg);
+  color: var(--status-blocked-text);
+  border-color: var(--status-blocked-border);
+}
+
+.status--completed {
+  background: var(--status-completed-bg);
+  color: var(--status-completed-text);
+  border-color: var(--status-completed-border);
+}
+
+.status--not-started {
+  background: var(--status-not-started-bg);
+  color: var(--status-not-started-text);
+  border-color: var(--status-not-started-border);
+}
+
+.status--unknown {
+  background: var(--status-unknown-bg);
+  color: var(--status-unknown-text);
+  border-color: var(--status-unknown-border);
+}
+
+/* --------------------------------------------------------------------------
+   Priority badges — escalating visual emphasis, p0 most urgent
+   -------------------------------------------------------------------------- */
+.project-card__priority {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.priority--p0 {
+  background: var(--priority-p0-bg);
+  color: var(--priority-p0-text);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.25);
+  font-weight: 800;
+}
+
+.priority--p1 {
+  background: var(--priority-p1-bg);
+  color: var(--priority-p1-text);
+  font-weight: 700;
+}
+
+.priority--p2 {
+  background: var(--priority-p2-bg);
+  color: var(--priority-p2-text);
+  font-weight: 600;
+}
+
+.priority--p3 {
+  background: var(--priority-p3-bg);
+  color: var(--priority-p3-text);
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.priority--unknown {
+  background: var(--priority-unknown-bg);
+  color: var(--priority-unknown-text);
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive breakpoints (supplemental to auto-fit/minmax)
+   -------------------------------------------------------------------------- */
+@media (min-width: 900px) {
+  .dashboard__grid,
+  .dashboard {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (min-width: 1400px) {
+  .dashboard__grid,
+  .dashboard {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
